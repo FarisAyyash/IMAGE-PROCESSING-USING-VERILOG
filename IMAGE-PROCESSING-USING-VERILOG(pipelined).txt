@@ -1,0 +1,192 @@
+module vga_syncIndex(
+clock,reset,sel_module,val,         //inputs - sel_module(select required function), reset(to switch on and off), val(give a value to adjust brightness and filters)
+red, green, blue,                    // red, green and blue output pixels
+Pixel_Input  
+);
+
+    input clock;
+    input reset;
+    input [7:0] val;            // intialize value to zero
+    input[3:0] sel_module;          // can select one of 8 functions
+    input [23:0] Pixel_Input;	    // total number of pixels 
+    reg[7:0] tred, tgreen, tblue;    // input pixel values
+    reg[7:0] red_i, green_i, blue_i; // intermediate values after function is applied
+    reg[7:0] red_o, green_o, blue_o; // output/intermediate pixel values
+    reg [15:0] r, b, g;              // variables used during calcultion 
+    output reg [3:0] red,green,blue; // final pixel values
+     
+// Stage 1: Read in input pixel values
+always @(posedge clock)
+begin
+        tblue =  {Pixel_Input[23], Pixel_Input[22], Pixel_Input[21], Pixel_Input[20], Pixel_Input[19], Pixel_Input[18], Pixel_Input[17], Pixel_Input[16]};
+        tgreen = {Pixel_Input[15], Pixel_Input[14], Pixel_Input[13], Pixel_Input[12], Pixel_Input[11], Pixel_Input[10], Pixel_Input[9], Pixel_Input[8]};
+        tred = {Pixel_Input[7], Pixel_Input[6], Pixel_Input[5], Pixel_Input[4], Pixel_Input[3], Pixel_Input[2], Pixel_Input[1], Pixel_Input[0]};
+end
+
+// Stage 2: Apply selected function
+always @(posedge clock)
+begin
+    // No modification
+     if(sel_module == 3'b000)begin
+        if(reset) begin
+            red_i = 0;
+            green_i = 0;
+            blue_i = 0;
+        end else begin
+        red_i = tred;
+        green_i = tgreen;
+        blue_i = tblue;
+    end  
+    // Increase brightness
+    end else if(sel_module == 3'b001)begin
+        
+        if(reset) begin
+            red_i = 0;
+            green_i = 0;
+            blue_i = 0;
+        end else begin
+            r = tred + val;
+            g = tgreen + val;
+            b = tblue + val;
+
+	if(r > 255)begin
+                red_i = 255;
+            end else begin
+                red_i = r;
+            end
+            if(g > 255)begin
+                green_i = 255;
+            end else begin
+                green_i = g;
+            end
+            if(b > 255)begin
+                blue_i = 255;
+            end else begin
+                blue_i = b;
+            end
+            
+            red_i = red_i/16;
+            blue_i = blue_i/16;
+            green_i = green_i/16;
+        end
+    // Decrease brightness
+    end else if(sel_module == 3'b010)begin
+        if(reset) begin
+            red_i = 0;
+            green_i = 0;
+            blue_i = 0;
+        end else begin
+            r = tred - val;
+            g = tgreen - val;
+            b = tblue - val;
+            
+            if(r < 0)begin
+                red_i = 0;
+            end else begin
+                red_i = r;
+            end
+            if(g < 0)begin
+                green_i = 0;
+            end else begin
+                green_i = g;
+            end
+            if(b < 0)begin
+                blue_i = 0;
+            end else begin
+                blue_i = b;
+            end
+            
+            red_i = red_i/16;
+            blue_i = blue_i/16;
+            green_i = green_i/16;
+        end
+    // Grayscale filter
+    end else if(sel_module == 3'b011)begin
+        if(reset) begin
+            red_i = 0;
+            green_i = 0;
+            blue_i = 0;
+        end else begin
+            red_i = (tred + tgreen + tblue)/3;
+            blue_i = red_i;
+            green_i = red_i;
+        end
+    // Invert colors
+    end else if(sel_module == 3'b100)begin
+        if(reset) begin
+            red_i = 0;
+            green_i = 0;
+            blue_i = 0;
+        end else begin
+            red_i = 255 - tred;
+            green_i = 255 - tgreen;
+            blue_i = 255 - tblue;
+        end  
+    // red filter
+    end else if(sel_module == 3'b101)begin
+        if(reset) begin
+            red_i = 0;
+            green_i = 0;
+            blue_i = 0;
+        end
+        else begin
+              r = tred - val;
+              if(r > 256)begin
+              red_i = 0;
+              end else begin
+              red_i = r/16;
+         end
+              blue_i = tblue/16;
+              green_i = tgreen/16;
+              
+         end
+                    
+      //blue filter
+      end else if(sel_module == 3'b110)begin
+            if(reset) begin
+            red_i = 0;
+            green_i = 0;
+            blue_i = 0;
+            end
+            else begin
+                 red_i = tred/16;
+                 b = tblue - val;
+                 if(b > 256)begin
+                    blue_i = 0;
+               end else begin
+                    blue_i = b/16;
+               end
+               green_i = tgreen/16;
+            end
+                    
+       //green filter
+       end else if(sel_module == 3'b111)begin
+              if(reset) begin
+            red_i = 0;
+            green_i = 0;
+            blue_i = 0;
+             end
+                else begin
+                red_i = tred/16;
+                blue_i = tblue/16;
+                g = tgreen - val;
+                if(g > 256)begin
+                   green_i = 0;
+                end else begin
+                green_i = g/16;
+            end
+end
+end
+end
+// Stage 3: Output modified pixel values
+always @(posedge clock)
+begin
+    red_o = red_i;
+    green_o = green_i;
+    blue_o = blue_i;
+    
+    red = {red_o[3],red_o[2], red_o[1], red_o[0]};
+    green = {green_o[3],green_o[2], green_o[1], green_o[0]};
+    blue = {blue_o[3],blue_o[2], blue_o[1], blue_o[0]};
+end
+endmodule

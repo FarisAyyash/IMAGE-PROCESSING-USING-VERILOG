@@ -1,0 +1,161 @@
+module vga_syncIndex_tb;
+    reg clock;
+    reg reset;
+    reg [7:0] val;
+    reg [3:0] sel_module;
+  reg [23:0] Pixel_Input;
+  	wire [3:0] red, green, blue;
+
+    vga_syncIndex dut (
+        .clock(clock),
+        .reset(reset),
+        .sel_module(sel_module),
+        .val(val),
+        .red(red),
+        .green(green),
+        .blue(blue),
+      .Pixel_Input(Pixel_Input)
+    );
+  initial begin
+    clock=0;
+  end
+always #5 clock<=~clock;
+    initial begin
+       
+        reset <= 1;
+        val <= 0;
+        sel_module <= 0;
+
+        #10
+        reset <= 0;
+//Test case 0: No modification
+        sel_module = 0;
+        val <= 100;
+		Pixel_Input <=798351;
+        $display("No modification");
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 50;
+		Pixel_Input<=125674;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 0;
+		Pixel_Input<=1346982;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+
+// Test case 1: Increase brightness
+        sel_module <= 1;
+        val <= 50;
+		Pixel_Input<=10540360;
+      $display("this Filter Increases Brightness");
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 100;
+		Pixel_Input<=804790;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 150;
+		Pixel_Input<=95324;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+//Test case 2: Decrease brightness
+        sel_module = 2;
+        val <= 100;
+		Pixel_Input<=798351;
+      $display("this Filter Decreases Brightness");
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 50;
+		Pixel_Input<=125674;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 0;
+		Pixel_Input<=1346982;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+
+//Test case 3: Grayscale filter
+        sel_module = 3;
+        val <= 100;
+		Pixel_Input<=798351;
+      $display("this is the Greyscale Filter");
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 50;
+		Pixel_Input<=125674;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 0;
+		Pixel_Input<=1346982;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+//Test case 4: Invert colors
+        sel_module = 4;
+        val <= 100;
+		Pixel_Input<=798351;
+      $display("This filter Invert Colors");
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 50;
+		Pixel_Input<=125674;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 0;
+		Pixel_Input<=1346982;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+
+//Test case 5: red filter
+        sel_module = 5;
+        val <= 100;
+		Pixel_Input<=798351;
+      $display("this is the Red filter");
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 50;
+		Pixel_Input<=125674;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 0;
+		Pixel_Input<=1346982;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+//Test case 6: blue filter
+        sel_module = 6;
+        val <= 100;
+		Pixel_Input<=798351;
+      $display("this is the Blue filter");
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 50;
+		Pixel_Input<=125674;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 0;
+		Pixel_Input<=1346982;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+//Test case 7: Green filter
+        sel_module = 7;
+        val <= 100;
+		Pixel_Input<=798351;
+      $display("this is the Green filter");
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 50;
+		Pixel_Input<=125674;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+        val <= 0;
+		Pixel_Input<=1346982;
+        #10
+        #5 $display("r:%d",red,"b:%d",blue," g:%d",green);
+
+        $finish;
+    end
+   initial
+ begin
+    $dumpfile("dump.vcd"); $dumpvars;
+ end
+  endmodule

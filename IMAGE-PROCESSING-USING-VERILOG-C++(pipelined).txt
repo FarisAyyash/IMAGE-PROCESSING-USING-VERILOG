@@ -1,0 +1,89 @@
+#include <iostream>
+#include"stdio.h"
+using namespace std;
+//const int NUM_MODULES = 8;
+
+int main() {
+    int clock, reset, sel_module, val;
+    cin >> clock;
+    cin >> sel_module;
+    cin >> val;
+    cin >> reset;
+    int tred, tgreen, tblue;
+    int r=0, g=0, b=0;
+    int red, green, blue;
+    int out2;
+    cin >> out2;
+
+    // Stage 1: Read in input pixel values
+    if (clock) {
+        tblue = (out2 >> 16) & 0xff;
+        tgreen = (out2 >> 8) & 0xff;
+        tred = out2 & 0xff;
+    }
+
+    // Stage 2: Apply selected function
+    if (clock) {
+         if (sel_module == 0 && !reset) {
+        red = tred;
+        green = tgreen;
+        blue = tblue;
+        }
+        else if (sel_module == 1 && !reset) {
+            r = tred + val;
+            g = tgreen + val;
+            b = tblue + val;
+
+            red = r > 255 ? 255 : r;
+            green = g > 255 ? 255 : g;
+            blue = b > 255 ? 255 : b;
+
+            red /= 16;
+            blue /= 16;
+            green /= 16;
+        }
+        else if (sel_module == 2 && !reset) {
+            r = tred - val;
+            g = tgreen - val;
+            b = tblue - val;
+
+            red = r < 0 ? 0 : r;
+            green = g < 0 ? 0 : g;
+            blue = b < 0 ? 0 : b;
+
+            red /= 16;
+            blue /= 16;
+            green /= 16;
+        }
+        else if (sel_module == 3 && !reset) {
+            red = (tred + tgreen + tblue) / 3;
+            blue = red;
+            green = red;
+        }
+        else if (sel_module == 4 && !reset) {
+            red = 255 - tred;
+            green = 255 - tgreen;
+            blue = 255 - tblue;
+        }
+        else if (sel_module == 5 && !reset) {
+             r = tred - val;
+             red = r > 255 ? 0 : red = r / 16;
+             blue = tblue / 16;
+             green = tgreen / 16;
+        }
+        else if (sel_module == 6 && !reset) {
+             red = tred / 16;
+             b = tblue - val;
+             blue = r > 255 ? 0 : blue = b / 16;
+             green = tgreen / 16;
+        }
+        else if (sel_module == 7 && !reset) {
+             red = tred / 16;
+             blue = tblue / 16;
+             g = tgreen - val;
+             green = r > 255 ? 0 : green = g / 16;
+         }
+    }
+    cout << "red:" << red << " blue:" << blue << " green:" << green << std::endl;
+    return 0;
+}
